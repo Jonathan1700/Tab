@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biblia — Tabernáculo Águila Blanca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a href="index.html" class="brand">
+      <img src="assets/logo.png" alt="Logo Tabernáculo Águila Blanca">
+      <span class="brand-name">Tabernáculo Águila Blanca<span>Casa de oración</span></span>
+    </a>
+    <nav>
+      <ul>
+        <li><a href="index.html#inicio">Inicio</a></li>
+        <li><a href="index.html#envivo">En Vivo</a></li>
+        <li><a href="index.html#horarios">Horarios</a></li>
+        <li><a href="biblia.html" class="active">Biblia</a></li>
+        <li><a href="index.html#visitanos">Visítanos</a></li>
+      </ul>
+    </nav>
+    <a href="index.html#envivo" class="nav-live"><span class="dot"></span> EN VIVO</a>
+    <button class="menu-btn" aria-label="Menú">☰</button>
+  </div>
+</header>
+
+<!-- BIBLIA -->
+<section class="section bible-page" id="biblia">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="sec-tag">La Palabra</p>
+      <h2>Lee la Biblia</h2>
+      <div class="divider"></div>
+      <p>Reina-Valera. Elige un libro y un capítulo para leerlo aquí mismo.</p>
+    </div>
+
+    <div class="bible reveal">
+      <div class="bible-bar">
+        <div class="bible-selects">
+          <label class="bsel">Libro
+            <select id="bibBook"></select>
+          </label>
+          <label class="bsel bsel-chap">Capítulo
+            <select id="bibChap"></select>
+          </label>
+        </div>
+        <div class="bible-nav">
+          <button id="bibPrev" class="bnav" aria-label="Capítulo anterior">&lsaquo;</button>
+          <button id="bibNext" class="bnav" aria-label="Capítulo siguiente">&rsaquo;</button>
+        </div>
+      </div>
+      <div class="bible-reader" id="bibReader">
+        <div class="bible-loading">Cargando la Biblia…</div>
+      </div>
+      <p class="bible-foot">Reina-Valera, edición de dominio público.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <img src="assets/logo.png" alt="Logo">
+          <span class="fn">Tabernáculo Águila Blanca</span>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h4>Navegación</h4>
+        <a href="index.html#inicio">Inicio</a>
+        <a href="index.html#horarios">Horarios</a>
+        <a href="biblia.html">Biblia</a>
+        <a href="index.html#envivo">En Vivo</a>
+        <a href="index.html#visitanos">Visítanos</a>
+      </div>
+      <div class="foot-col">
+        <h4>Síguenos</h4>
+        <a href="#" data-link="youtube">YouTube</a>
+        <a href="#" data-link="facebook">Facebook</a>
+        <a href="#" class="placeholder">Instagram (por definir)</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      © <span id="year"></span> Tabernáculo Águila Blanca · Todos los derechos reservados
+    </div>
+  </div>
+</footer>
+
+<!-- MENÚ MÓVIL -->
+<div class="mobile-nav" id="mobileNav" aria-hidden="true">
+  <a href="index.html#inicio"    class="mob-link">Inicio</a>
+  <a href="index.html#envivo"    class="mob-link">En Vivo</a>
+  <a href="index.html#horarios"  class="mob-link">Horarios</a>
+  <a href="biblia.html"          class="mob-link">Biblia</a>
+  <a href="index.html#visitanos" class="mob-link">Visítanos</a>
+  <a href="index.html#envivo"    class="mob-live"><span class="dot"></span> Ver en vivo</a>
+</div>
+
+<!-- LECTOR INMERSIVO PANTALLA COMPLETA -->
+<div class="reader-fullscreen" id="readerFS" role="dialog" aria-modal="true">
+  <button class="rfs-close" id="rfsClose" aria-label="Cerrar">✕</button>
+  <div class="rfs-body">
+    <div class="rfs-inner" id="rfsInner"></div>
+  </div>
+  <div class="rfs-footer">
+    <span class="rfs-footer-ref" id="rfsRef"></span>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>
