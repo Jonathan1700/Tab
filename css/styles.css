@@ -859,7 +859,7 @@ nav a.active::after{width:100%}
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   position: relative;
   overflow: hidden;
   transition: transform .35s, box-shadow .35s;
@@ -873,6 +873,13 @@ nav a.active::after{width:100%}
 }
 .alb-card:hover { transform: translateY(-6px); box-shadow: 0 28px 60px -24px rgba(60,48,20,.5); }
 
+/* Fila superior: icono + texto juntos */
+.alb-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
 .alb-icon {
   width: 46px; height: 46px;
   border-radius: 50%;
@@ -882,20 +889,20 @@ nav a.active::after{width:100%}
 }
 .alb-icon svg { width: 22px; height: 22px; fill: var(--gold-deep); }
 
-.alb-titulo { font-size: 1.18rem; font-weight: 600; }
-.alb-autor  { font-size: .82rem; color: var(--ink-soft); margin-top: 3px; }
+.alb-info { min-width: 0; }
+.alb-titulo { font-size: 1.12rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.alb-autor  { font-size: .8rem; color: var(--ink-soft); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Reproductor */
 .alb-player {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-top: 4px;
 }
 
 .ap-play {
   flex-shrink: 0;
-  width: 46px; height: 46px;
+  width: 48px; height: 48px;
   border-radius: 50%;
   border: none;
   background: var(--gold);
@@ -903,19 +910,25 @@ nav a.active::after{width:100%}
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 8px 20px -8px rgba(184,146,63,.7);
   transition: transform .25s, box-shadow .25s;
+  -webkit-tap-highlight-color: transparent;
 }
-.ap-play:hover { transform: scale(1.1); box-shadow: 0 12px 26px -8px rgba(184,146,63,.88); }
+.ap-play:hover  { transform: scale(1.1); box-shadow: 0 12px 26px -8px rgba(184,146,63,.88); }
+.ap-play:active { transform: scale(.95); }
 .ap-play svg { width: 18px; height: 18px; fill: #fff; }
 .ap-play .ico-play { margin-left: 3px; }
 
 .ap-body { flex: 1; min-width: 0; }
 
+/* Zona de toque amplia para la barra */
 .ap-bar {
-  height: 5px;
+  height: 6px;
   background: rgba(184,146,63,.18);
   border-radius: 10px;
   cursor: pointer;
   overflow: hidden;
+  padding: 8px 0;
+  background-clip: content-box;
+  margin: -8px 0;
 }
 .ap-fill {
   height: 100%;
@@ -930,7 +943,7 @@ nav a.active::after{width:100%}
   justify-content: space-between;
   font-size: .7rem;
   color: var(--ink-soft);
-  margin-top: 6px;
+  margin-top: 14px;
   letter-spacing: .02em;
 }
 
@@ -942,6 +955,11 @@ nav a.active::after{width:100%}
   font-size: .95rem;
 }
 
+/* ── Móvil ── */
 @media (max-width: 600px) {
-  .alabanzas-grid { grid-template-columns: 1fr; }
+  .alabanzas-grid { grid-template-columns: 1fr; gap: 16px; }
+  .alb-card { padding: 20px 18px 18px; border-radius: 16px; }
+  .alb-titulo { font-size: 1rem; }
+  .ap-play { width: 52px; height: 52px; }
+  .ap-play svg { width: 20px; height: 20px; }
 }
