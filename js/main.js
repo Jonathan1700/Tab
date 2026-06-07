@@ -45,6 +45,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
   }, { threshold: 0.1, rootMargin: '0px 0px -48px 0px' });
 
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  window._revealIO = io;
 
   /* 5 · Parallax en el hero (solo desktop) */
   if (desktop) {

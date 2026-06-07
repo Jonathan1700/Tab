@@ -841,3 +841,107 @@ nav a.active::after{width:100%}
   .rfs-inner .verse { font-size: clamp(1.6rem, 6vw, 2.4rem); padding: 20px 0; }
   .rfs-footer { padding: 28px 5vw 18px; }
 }
+
+/* ---------- ALABANZAS ---------- */
+#alabanzas { background: linear-gradient(180deg, var(--pearl-2), var(--pearl-4)); }
+
+.alabanzas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.alb-card {
+  background: var(--pearl-4);
+  border: 1px solid rgba(184,146,63,.18);
+  border-radius: 20px;
+  padding: 26px 24px 22px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+  transition: transform .35s, box-shadow .35s;
+}
+.alb-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold-light), var(--gold), var(--gold-deep));
+}
+.alb-card:hover { transform: translateY(-6px); box-shadow: 0 28px 60px -24px rgba(60,48,20,.5); }
+
+.alb-icon {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: rgba(184,146,63,.12);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.alb-icon svg { width: 22px; height: 22px; fill: var(--gold-deep); }
+
+.alb-titulo { font-size: 1.18rem; font-weight: 600; }
+.alb-autor  { font-size: .82rem; color: var(--ink-soft); margin-top: 3px; }
+
+/* Reproductor */
+.alb-player {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.ap-play {
+  flex-shrink: 0;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  border: none;
+  background: var(--gold);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 20px -8px rgba(184,146,63,.7);
+  transition: transform .25s, box-shadow .25s;
+}
+.ap-play:hover { transform: scale(1.1); box-shadow: 0 12px 26px -8px rgba(184,146,63,.88); }
+.ap-play svg { width: 18px; height: 18px; fill: #fff; }
+.ap-play .ico-play { margin-left: 3px; }
+
+.ap-body { flex: 1; min-width: 0; }
+
+.ap-bar {
+  height: 5px;
+  background: rgba(184,146,63,.18);
+  border-radius: 10px;
+  cursor: pointer;
+  overflow: hidden;
+}
+.ap-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--gold-light), var(--gold));
+  border-radius: 10px;
+  transition: width .18s linear;
+}
+
+.ap-times {
+  display: flex;
+  justify-content: space-between;
+  font-size: .7rem;
+  color: var(--ink-soft);
+  margin-top: 6px;
+  letter-spacing: .02em;
+}
+
+.alb-empty {
+  text-align: center;
+  color: var(--ink-soft);
+  font-style: italic;
+  padding: 48px 0;
+  font-size: .95rem;
+}
+
+@media (max-width: 600px) {
+  .alabanzas-grid { grid-template-columns: 1fr; }
+}
