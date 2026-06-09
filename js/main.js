@@ -205,14 +205,16 @@ const CONFIG = {
   const chapSel = document.getElementById('bibChap');
   const prev    = document.getElementById('bibPrev');
   const next    = document.getElementById('bibNext');
+  const verBtns = document.querySelectorAll('.bvt');
+
   let BOOKS=null, loaded=false, loading=false;
 
   function load(){
     if(loaded || loading) return;
     loading=true;
     const s=document.createElement('script');
-    s.src='assets/biblia/rv1909.js';
-    s.onload =()=>{ BOOKS=window.RV1909_BOOKS; loaded=true; loading=false; build(); };
+    s.src='assets/biblia/rv1960.js';
+    s.onload =()=>{ BOOKS=window.RV1960_BOOKS; loaded=true; loading=false; build(); };
     s.onerror=()=>{ loading=false; reader.innerHTML='<div class="bible-loading">No se pudo cargar la Biblia. Ábrelo desde Live Server o tu hosting (no con doble clic).</div>'; };
     document.head.appendChild(s);
   }

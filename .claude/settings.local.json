@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Skill(update-config)",
-      "Skill(update-config:*)"
+      "Skill(update-config:*)",
+      "Bash(Get-Content \"c:\\\\Users\\\\PC\\\\Downloads\\\\tabernaculo-aguila-blanca\\\\assets\\\\biblia\\\\rv1909.js\" -TotalCount 5)"
     ]
   }
 }

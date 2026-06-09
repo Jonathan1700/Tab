@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(gh api *)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/mrk214/bible-data-es-spa/main/data/es___spa___spa/RVR1960_vid_149.json\" -o \"/tmp/rv1960_raw.json\")",
+      "Read(//tmp/**)",
+      "Bash(ls /tmp/rv1960_raw.json 2>/dev/null || echo \"NOT FOUND\" *)",
+      "Read(//c/Users/PC/AppData/Local/Temp/**)",
+      "Bash(node -e ' *)"
+    ]
+  }
+}

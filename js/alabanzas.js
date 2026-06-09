@@ -68,7 +68,7 @@ const ALABANZAS = [
   }
 
   grid.querySelectorAll('.alb-player').forEach(player => {
-    const audio    = new Audio(player.dataset.src);
+    player._audio = null; // se crea al primer toque (requerido por iOS)
     const playBtn  = player.querySelector('.ap-play');
     const icoPlay  = playBtn.querySelector('.ico-play');
     const icoPause = playBtn.querySelector('.ico-pause');
@@ -77,25 +77,31 @@ const ALABANZAS = [
     const curEl    = player.querySelector('.ap-cur');
     const durEl    = player.querySelector('.ap-dur');
 
-    audio.addEventListener('loadedmetadata', () => {
-      durEl.textContent = fmt(audio.duration);
-    });
-
-    audio.addEventListener('timeupdate', () => {
-      const p = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
-      fill.style.width = p + '%';
-      bar.setAttribute('aria-valuenow', Math.round(p));
-      curEl.textContent = fmt(audio.currentTime);
-    });
-
-    audio.addEventListener('ended', () => {
-      icoPlay.style.display  = '';
-      icoPause.style.display = 'none';
-      fill.style.width = '0%';
-      curEl.textContent = '0:00';
-    });
+    /* Crea el Audio solo la primera vez que el usuario toca play.
+       encodeURI convierte los espacios en %20 para que funcione en todos los móviles. */
+    function ensureAudio() {
+      if (player._audio) return player._audio;
+      const a = new Audio(encodeURI(player.dataset.src));
+      a.addEventListener('loadedmetadata', () => { durEl.textContent = fmt(a.duration); });
+      a.addEventListener('timeupdate', () => {
+        const p = a.duration ? (a.currentTime / a.duration) * 100 : 0;
+        fill.style.width = p + '%';
+        bar.setAttribute('aria-valuenow', Math.round(p));
+        curEl.textContent = fmt(a.currentTime);
+      });
+      a.addEventListener('ended', () => {
+        icoPlay.style.display  = '';
+        icoPause.style.display = 'none';
+        fill.style.width = '0%';
+        curEl.textContent = '0:00';
+      });
+      player._audio = a;
+      return a;
+    }
 
     playBtn.addEventListener('click', () => {
+      const a = ensureAudio();
+
       /* Pausar todos los demás reproductores */
       grid.querySelectorAll('.alb-player').forEach(other => {
         if (other !== player && other._audio && !other._audio.paused) {
@@ -105,12 +111,17 @@ const ALABANZAS = [
         }
       });
 
-      if (audio.paused) {
-        audio.play();
-        icoPlay.style.display  = 'none';
-        icoPause.style.display = '';
+      if (a.paused) {
+        const promise = a.play();
+        if (promise) {
+          promise
+            .then(() => { icoPlay.style.display = 'none'; icoPause.style.display = ''; })
+            .catch(() => { icoPlay.style.display = ''; icoPause.style.display = 'none'; });
+        } else {
+          icoPlay.style.display = 'none'; icoPause.style.display = '';
+        }
       } else {
-        audio.pause();
+        a.pause();
         icoPlay.style.display  = '';
         icoPause.style.display = 'none';
       }
@@ -118,12 +129,10 @@ const ALABANZAS = [
 
     /* Toque/clic en la barra de progreso para saltar */
     bar.addEventListener('click', e => {
+      const a = player._audio;
+      if (!a || !a.duration) return;
       const r = bar.getBoundingClientRect();
-      if (audio.duration) {
-        audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
-      }
+      a.currentTime = ((e.clientX - r.left) / r.width) * a.duration;
     });
-
-    player._audio = audio;
   });
 })();
