@@ -77,11 +77,16 @@ const ALABANZAS = [
     const curEl    = player.querySelector('.ap-cur');
     const durEl    = player.querySelector('.ap-dur');
 
-    /* Crea el Audio solo la primera vez que el usuario toca play.
-       encodeURI convierte los espacios en %20 para que funcione en todos los móviles. */
+    /* El Audio se crea la primera vez que el usuario toca play.
+       Esto es necesario para iOS Safari, que bloquea audio creado fuera de un gesto.
+       Los espacios en el nombre de archivo se reemplazan por %20 solo en la parte del nombre. */
     function ensureAudio() {
       if (player._audio) return player._audio;
-      const a = new Audio(encodeURI(player.dataset.src));
+      const src = player.dataset.src
+        .split('/')
+        .map((seg, i, arr) => i === arr.length - 1 ? seg.replace(/ /g, '%20') : seg)
+        .join('/');
+      const a = new Audio(src);
       a.addEventListener('loadedmetadata', () => { durEl.textContent = fmt(a.duration); });
       a.addEventListener('timeupdate', () => {
         const p = a.duration ? (a.currentTime / a.duration) * 100 : 0;
@@ -112,14 +117,15 @@ const ALABANZAS = [
       });
 
       if (a.paused) {
-        const promise = a.play();
-        if (promise) {
-          promise
-            .then(() => { icoPlay.style.display = 'none'; icoPause.style.display = ''; })
-            .catch(() => { icoPlay.style.display = ''; icoPause.style.display = 'none'; });
-        } else {
-          icoPlay.style.display = 'none'; icoPause.style.display = '';
-        }
+        /* Actualizar ícono de inmediato para respuesta visual instantánea */
+        icoPlay.style.display  = 'none';
+        icoPause.style.display = '';
+        const p = a.play();
+        /* Si el navegador rechaza la reproducción, revertir el ícono */
+        if (p) p.catch(() => {
+          icoPlay.style.display  = '';
+          icoPause.style.display = 'none';
+        });
       } else {
         a.pause();
         icoPlay.style.display  = '';
