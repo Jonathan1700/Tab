@@ -7,7 +7,7 @@
    Para quitar una alabanza: borra su línea del arreglo.
 ══════════════════════════════════════════════════════════════ */
 const ALABANZAS = [
-  { titulo: "EL TERCER EXODO", archivo: "assets/alabanzas/El TERCER EXODO.mp3" },
+  { titulo: "EL TERCER EXODO", archivo: "assets/alabanzas/EL TERCER EXODO.mp3" },
 ];
 
 (function () {
