@@ -3,7 +3,15 @@
     "allow": [
       "Skill(update-config)",
       "Skill(update-config:*)",
-      "Bash(Get-Content \"c:\\\\Users\\\\PC\\\\Downloads\\\\tabernaculo-aguila-blanca\\\\assets\\\\biblia\\\\rv1909.js\" -TotalCount 5)"
+      "Bash(Get-Content \"c:\\\\Users\\\\PC\\\\Downloads\\\\tabernaculo-aguila-blanca\\\\assets\\\\biblia\\\\rv1909.js\" -TotalCount 5)",
+      "Bash(node --check js/main.js)",
+      "Bash(node --check js/alabanzas.js)",
+      "WebFetch(domain:tabernaculozoe.org)",
+      "Bash(curl -sL -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/124.0 Safari/537.36\" \"https://tabernaculozoe.org/dove/\" -o dove.html)",
+      "Bash(curl -sL --compressed -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/124.0 Safari/537.36' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: es-ES,es;q=0.9,en;q=0.8' https://tabernaculozoe.org/dove/ -o dove.html)",
+      "Bash(curl -s -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\)' https://api.soundcloud.com/tracks/620406204?client_id=f5a4ce77a49998f7fdc8c0db2b1a5a9c)",
+      "Bash(curl -s -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/124.0 Safari/537.36' -H 'Accept: application/json' -w '\\\\nHTTP=%{http_code}\\\\n' https://api-v2.soundcloud.com/tracks/620406204?client_id=f5a4ce77a49998f7fdc8c0db2b1a5a9c)",
+      "Bash(curl -s -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/124.0 Safari/537.36' -H 'Accept: application/json' -w '\\\\nHTTP=%{http_code}\\\\n' https://api-v2.soundcloud.com/tracks/87331492?client_id=f5a4ce77a49998f7fdc8c0db2b1a5a9c)"
     ]
   }
 }

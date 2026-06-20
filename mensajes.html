@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Biblia — Tabernáculo Águila Blanca</title>
+<title>Mensajes — Tabernáculo Águila Blanca</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -22,8 +22,8 @@
         <li><a href="index.html#inicio">Inicio</a></li>
         <li><a href="index.html#envivo">En Vivo</a></li>
         <li><a href="index.html#horarios">Horarios</a></li>
-        <li><a href="biblia.html" class="active">Biblia</a></li>
-        <li><a href="mensajes.html">Mensajes</a></li>
+        <li><a href="biblia.html">Biblia</a></li>
+        <li><a href="mensajes.html" class="active">Mensajes</a></li>
         <li><a href="alabanzas.html">Alabanzas</a></li>
         <li><a href="index.html#visitanos">Visítanos</a></li>
       </ul>
@@ -33,35 +33,51 @@
   </div>
 </header>
 
-<!-- BIBLIA -->
-<section class="section bible-page" id="biblia">
+<!-- MENSAJES -->
+<section class="section msg-page" id="mensajes">
   <div class="wrap">
     <div class="sec-head reveal">
-      <p class="sec-tag">La Palabra</p>
-      <h2>Lee la Biblia</h2>
       <div class="divider"></div>
-      <p>Elige la versión, el libro y el capítulo para leerlo aquí mismo.</p>
+      <p>Elige un mensaje de la lista para leerlo aquí mismo, búscalo o descárgalo.</p>
     </div>
 
-    <div class="bible reveal">
-      <div class="bible-bar">
-        <div class="bible-selects">
-          <label class="bsel">Libro
-            <select id="bibBook"></select>
-          </label>
-          <label class="bsel bsel-chap">Capítulo
-            <select id="bibChap"></select>
-          </label>
+    <div class="msg reveal">
+      <!-- BARRA DE BÚSQUEDA SUPERIOR -->
+      <div class="msg-searchbar">
+        <div class="msg-filter">
+          <span class="msg-field-ico">≡</span>
+          <input id="msgFilter" type="text" placeholder="Filtrar por título, fecha o lugar…" autocomplete="off">
         </div>
-        <div class="bible-nav">
-          <button id="bibPrev" class="bnav" aria-label="Capítulo anterior">&lsaquo;</button>
-          <button id="bibNext" class="bnav" aria-label="Capítulo siguiente">&rsaquo;</button>
+        <div class="msg-search">
+          <span class="msg-field-ico">⌕</span>
+          <input id="msgSearch" type="text" placeholder="Buscar en todos los Mensajes…" autocomplete="off">
+          <button id="msgSearchBtn" class="msg-search-btn">Buscar</button>
         </div>
       </div>
-      <div class="bible-reader" id="bibReader">
-        <div class="bible-loading">Cargando la Biblia…</div>
+
+      <div class="msg-grid">
+        <!-- PANEL PRINCIPAL: lector (a la izquierda, protagonista) -->
+        <div class="msg-reader-pane">
+          <div class="msg-toolbar" id="msgToolbar">
+            <span class="msg-tool-code" id="msgToolCode"></span>
+            <span class="msg-tool-title" id="msgToolTitle"></span>
+            <span class="msg-tool-spacer"></span>
+            <button class="msg-tool" id="msgToolSearch" aria-label="Buscar en este mensaje" title="Buscar en este mensaje">⌕</button>
+            <a class="msg-tool" id="msgToolDownload" aria-label="Descargar PDF" title="Descargar PDF" download>⤓</a>
+          </div>
+          <div class="msg-reader" id="msgReader">
+            <div class="msg-loading">Selecciona un mensaje del índice.</div>
+          </div>
+        </div>
+
+        <!-- ÍNDICE: lista (a la derecha) -->
+        <aside class="msg-list-pane">
+          <div class="msg-list-title">Índice de mensajes</div>
+          <div class="msg-list" id="msgList">
+            <div class="msg-loading">Cargando los mensajes…</div>
+          </div>
+        </aside>
       </div>
-      <p class="bible-foot">Reina-Valera 1960® © Sociedades Bíblicas en América Latina.</p>
     </div>
   </div>
 </section>

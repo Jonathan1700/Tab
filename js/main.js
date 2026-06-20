@@ -68,11 +68,70 @@ document.getElementById('year').textContent = new Date().getFullYear();
   }
 })();
 
-// Header shrink on scroll
-const head=document.querySelector('header');
-addEventListener('scroll',()=>{
-  head.style.boxShadow = scrollY>20 ? '0 8px 30px -18px rgba(60,48,20,.5)' : 'none';
-});
+// ─── REALCE VISUAL v2 ──────────────────────────────────────────
+(function () {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const header = document.querySelector('header');
+
+  // Barra de progreso de lectura
+  const bar = document.createElement('div');
+  bar.className = 'scroll-progress';
+  document.body.appendChild(bar);
+
+  // Aura de luz del hero (solo donde existe el hero)
+  const hero = document.querySelector('.hero');
+  if (hero && !hero.querySelector('.hero-glow')) {
+    const g = document.createElement('div');
+    g.className = 'hero-glow';
+    g.setAttribute('aria-hidden', 'true');
+    hero.insertBefore(g, hero.firstChild);
+  }
+
+  // Scroll: progreso + estado compacto del header (un solo rAF)
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const y = window.scrollY || document.documentElement.scrollTop;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = (max > 0 ? (y / max) * 100 : 0) + '%';
+      if (header) header.classList.toggle('scrolled', y > 20);
+      ticking = false;
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // Revelado del título palabra por palabra (efecto de montaje)
+  const h1 = document.querySelector('.hero h1');
+  if (h1 && !reduce) {
+    const frag = document.createDocumentFragment();
+    let idx = 0;
+    Array.from(h1.childNodes).forEach(node => {
+      const em = node.nodeType === 1 && node.tagName === 'EM';
+      (node.textContent || '').split(/(\s+)/).forEach(tok => {
+        if (tok === '') return;
+        if (/^\s+$/.test(tok)) { frag.appendChild(document.createTextNode(tok)); return; }
+        const mask = document.createElement('span');
+        mask.className = 'word-mask';
+        const up = document.createElement('span');
+        up.className = 'word-up' + (em ? ' em' : '');
+        up.textContent = tok;
+        up.style.transitionDelay = (0.25 + idx * 0.09).toFixed(2) + 's';
+        idx++;
+        mask.appendChild(up);
+        frag.appendChild(mask);
+      });
+    });
+    h1.innerHTML = '';
+    h1.appendChild(frag);
+    h1.style.animation = 'none';
+    h1.style.opacity = '1';
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => h1.classList.add('ready')));
+  }
+})();
 
 // ─── MENÚ MÓVIL ────────────────────────────────────────────────
 (function(){
@@ -271,6 +330,7 @@ const CONFIG = {
     rfsInner.innerHTML = html;
 
     readerFS.classList.add('open');
+    readerFS.classList.remove('minimized');
     document.body.style.overflow = 'hidden';
     rfsBody.scrollTop = 0;
 
@@ -280,25 +340,45 @@ const CONFIG = {
       if (target) setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
     }
 
-    // Pantalla completa nativa
+    requestNative();
+  }
+
+  // Helpers de pantalla completa nativa
+  function inNativeFS() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement);
+  }
+  function requestNative() {
     const reqFS = readerFS.requestFullscreen || readerFS.webkitRequestFullscreen || readerFS.mozRequestFullScreen;
     if (reqFS) reqFS.call(readerFS).catch(() => {});
   }
-
-  function closeFullscreen() {
-    readerFS.classList.remove('open');
-    document.body.style.overflow = '';
+  function exitNative() {
     const exitFS = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
-    if (exitFS && (document.fullscreenElement || document.webkitFullscreenElement)) {
-      exitFS.call(document).catch(() => {});
-    }
+    if (exitFS && inNativeFS()) exitFS.call(document).catch(() => {});
   }
 
+  // Esc (1ª vez): salir de pantalla completa y quedarse en ventana flotante
+  function minimize() {
+    readerFS.classList.add('minimized');
+    exitNative();
+  }
+  // Volver a pantalla completa desde la ventana flotante
+  function expand() {
+    readerFS.classList.remove('minimized');
+    requestNative();
+  }
+  // Cierre total del lector
+  function closeFullscreen() {
+    readerFS.classList.remove('open', 'minimized');
+    document.body.style.overflow = '';
+    exitNative();
+  }
+
+  // Cuando el navegador sale de pantalla completa (p. ej. con Esc),
+  // no cerramos: pasamos a ventana flotante minimizada.
   ['fullscreenchange', 'webkitfullscreenchange'].forEach(ev => {
     document.addEventListener(ev, () => {
-      if (!document.fullscreenElement && !document.webkitFullscreenElement && readerFS.classList.contains('open')) {
-        readerFS.classList.remove('open');
-        document.body.style.overflow = '';
+      if (!inNativeFS() && readerFS.classList.contains('open')) {
+        readerFS.classList.add('minimized');
       }
     });
   });
@@ -311,14 +391,254 @@ const CONFIG = {
   });
 
   document.getElementById('rfsClose').addEventListener('click', closeFullscreen);
+  document.getElementById('rfsExpand').addEventListener('click', expand);
+  // Cerrar al pulsar fuera de la ventana (solo en modo minimizado)
+  readerFS.addEventListener('click', (e) => {
+    if (readerFS.classList.contains('minimized') && e.target === readerFS) closeFullscreen();
+  });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && readerFS.classList.contains('open')) closeFullscreen();
+    if (e.key !== 'Escape' || !readerFS.classList.contains('open')) return;
+    if (inNativeFS()) return;                  // el navegador gestiona el Esc → dispara minimize
+    if (readerFS.classList.contains('minimized')) closeFullscreen(); // Esc otra vez → cerrar
+    else minimize();
   });
 
   // Carga diferida: solo cuando el apartado se acerca a la vista
   const obs=new IntersectionObserver((es)=>{
     es.forEach(e=>{ if(e.isIntersecting){ load(); obs.disconnect(); } });
   },{rootMargin:'250px'});
+  obs.observe(section);
+})();
+
+/* ===================== LECTOR DE MENSAJES ===================== */
+(function initMensajes(){
+  const section = document.getElementById('mensajes');
+  if(!section) return;
+
+  const listEl   = document.getElementById('msgList');
+  const readerEl = document.getElementById('msgReader');
+  const filterEl = document.getElementById('msgFilter');
+  const searchEl = document.getElementById('msgSearch');
+  const searchBtn= document.getElementById('msgSearchBtn');
+  const tbCode   = document.getElementById('msgToolCode');
+  const tbTitle  = document.getElementById('msgToolTitle');
+  const tbDown   = document.getElementById('msgToolDownload');
+  const tbSearch = document.getElementById('msgToolSearch');
+
+  let MSGS=null, loaded=false, loading=false, current=-1, activeQuery='';
+
+  // Quitar acentos + minúsculas para buscar/filtrar
+  const norm = s => (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const esc  = s => (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  const MESES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  function fechaDe(code){
+    const m=/^(\d{2})-(\d{2})(\d{2})[A-Za-z]?$/.exec(code);
+    if(!m) return '';
+    const yy=+m[1], mm=+m[2], dd=+m[3];
+    const year=(yy<30?2000:1900)+yy;
+    if(mm<1||mm>12||dd<1||dd>31) return String(year);
+    return dd+' '+MESES[mm-1]+' '+year;
+  }
+  function textoDe(m){ return m.paras.map(p=>p.blocks.join(' ')).join(' '); }
+
+  function load(){
+    if(loaded||loading) return;
+    loading=true;
+    const s=document.createElement('script');
+    s.src='assets/mensajes/mensajes.js';
+    s.onload =()=>{ MSGS=window.MENSAJES||[]; MSGS.forEach(m=>{ m._buscable=norm(textoDe(m)); }); loaded=true; loading=false; buildList(); };
+    s.onerror=()=>{ loading=false; listEl.innerHTML='<div class="msg-loading">No se pudieron cargar los mensajes. Ábrelo desde Live Server o tu hosting (no con doble clic).</div>'; };
+    document.head.appendChild(s);
+  }
+
+  // ── LISTA ─────────────────────────────────────────────────
+  function listItem(m, i, snippet){
+    return '<button class="msg-item'+(i===current?' active':'')+'" data-i="'+i+'">'
+      + '<div class="msg-item-head"><span class="msg-item-code">'+esc(m.code)+'</span>'
+      + '<span class="msg-item-title">'+esc(m.title)+'</span></div>'
+      + '<div class="msg-item-place">'+esc(m.place||'—')+'</div>'
+      + (snippet?'<div class="msg-item-snippet">'+snippet+'</div>':'')
+      + '<div class="msg-item-src">'+esc(fechaDe(m.code))+'</div>'
+      + '</button>';
+  }
+  function buildList(items){
+    const arr = items || MSGS.map((m,i)=>({m,i}));
+    if(!arr.length){ listEl.innerHTML='<div class="msg-loading">Sin resultados.</div>'; return; }
+    listEl.innerHTML = arr.map(o=>listItem(o.m,o.i,o.snippet)).join('');
+  }
+
+  // Filtro por metadatos (título / fecha / lugar / código)
+  function applyFilter(){
+    if(!loaded) return;
+    const q=norm(filterEl.value.trim());
+    if(!q){ buildList(); return; }
+    const arr=[];
+    MSGS.forEach((m,i)=>{
+      const hay=norm(m.title+' '+m.place+' '+m.code+' '+fechaDe(m.code));
+      if(hay.includes(q)) arr.push({m,i});
+    });
+    buildList(arr);
+  }
+
+  // Búsqueda en el texto completo de todos los mensajes
+  function snippetFor(buscable, original, q){
+    const idx=buscable.indexOf(q);
+    if(idx<0) return '';
+    const start=Math.max(0,idx-40), end=Math.min(original.length,idx+q.length+60);
+    let frag=original.slice(start,end);
+    // resaltar coincidencia (insensible a acentos por posición)
+    const before=esc(frag.slice(0,idx-start));
+    const hit=esc(frag.slice(idx-start, idx-start+q.length));
+    const after=esc(frag.slice(idx-start+q.length));
+    return (start>0?'…':'')+before+'<mark>'+hit+'</mark>'+after+(end<original.length?'…':'');
+  }
+  function applySearch(){
+    if(!loaded) return;
+    const raw=searchEl.value.trim();
+    activeQuery=raw;
+    if(!raw){ filterEl.disabled=false; buildList(); return; }
+    const q=norm(raw);
+    const arr=[];
+    MSGS.forEach((m,i)=>{
+      const pos=m._buscable.indexOf(q);
+      if(pos>=0){
+        const original=textoDe(m);
+        arr.push({m,i,snippet:snippetFor(m._buscable,original,q)});
+      }
+    });
+    buildList(arr);
+  }
+
+  // Normaliza conservando la longitud (1 char → 1 char) para resaltar con offsets correctos
+  const normLen = s => Array.from(s||'').map(c=>c.normalize('NFD')[0].toLowerCase()).join('');
+
+  // ── LECTOR ────────────────────────────────────────────────
+  function render(i){
+    const m=MSGS[i]; if(!m) return;
+    current=i;
+    tbCode.textContent=m.code;
+    tbTitle.textContent=m.title;
+    tbDown.href='assets/mensajes/pdf/'+encodeURIComponent(m.pdf||(m.code+'.pdf'));
+    tbDown.setAttribute('download', m.code+' '+m.title+'.pdf');
+
+    const place = m.place ? esc(m.place) : '';
+    let html='<div class="msg-doc">'
+      + '<div class="msg-doc-mast">'
+      +   '<div class="msg-doc-date">'+esc(fechaDe(m.code))+'</div>'
+      +   '<h3 class="msg-doc-title">'+esc(m.title)+'</h3>'
+      +   '<div class="msg-doc-meta">'+(place?place+' · ':'')+'<span class="msg-doc-codeval">'+esc(m.code)+'</span></div>'
+      + '</div>';
+    m.paras.forEach((p,pi)=>{
+      html+='<div class="msg-para" data-pi="'+pi+'">';
+      p.blocks.forEach((b,bi)=>{
+        if(bi===0) html+='<p class="msg-block"><span class="msg-pn">'+p.num+'</span>'+esc(b)+'</p>';
+        else       html+='<p class="msg-block msg-sub">'+esc(b)+'</p>';
+      });
+      html+='</div>';
+    });
+    html+='</div>';
+    readerEl.innerHTML=html;
+    readerEl.scrollTop=0;
+
+    if(activeQuery) markInReader(activeQuery);
+
+    // marcar activo en la lista
+    listEl.querySelectorAll('.msg-item').forEach(b=>b.classList.toggle('active', +b.dataset.i===i));
+  }
+
+  // Resaltado dentro del lector (insensible a acentos, offsets conservados)
+  function markInReader(raw){
+    const q=normLen(raw); if(!q) return;
+    // recolectar nodos de texto primero (no mutar durante el recorrido)
+    const walker=document.createTreeWalker(readerEl, NodeFilter.SHOW_TEXT, null);
+    const nodes=[]; let node;
+    while((node=walker.nextNode())) nodes.push(node);
+    let first=null;
+    nodes.forEach(n=>{
+      const idx=normLen(n.nodeValue).indexOf(q);
+      if(idx<0) return;
+      const after=n.splitText(idx);
+      after.splitText(q.length);
+      const mark=document.createElement('mark'); mark.className='msg-mark';
+      mark.textContent=after.nodeValue;
+      after.parentNode.replaceChild(mark, after);
+      if(!first) first=mark;
+    });
+    if(first) setTimeout(()=>first.scrollIntoView({behavior:'smooth',block:'center'}),60);
+  }
+
+  // ── EVENTOS ───────────────────────────────────────────────
+  listEl.addEventListener('click',e=>{
+    const item=e.target.closest('.msg-item'); if(!item) return;
+    render(+item.dataset.i);
+  });
+  filterEl.addEventListener('input', applyFilter);
+  searchEl.addEventListener('input', ()=>{ if(!searchEl.value.trim()){ activeQuery=''; applySearch(); } });
+  searchEl.addEventListener('keydown', e=>{ if(e.key==='Enter') applySearch(); });
+  searchBtn.addEventListener('click', applySearch);
+  tbSearch.addEventListener('click', ()=>{
+    if(current<0){ searchEl.focus(); return; }
+    if(activeQuery){ markInReader(activeQuery); }
+    else searchEl.focus();
+  });
+
+  // ── LECTOR INMERSIVO PANTALLA COMPLETA (reutiliza #readerFS) ──
+  const readerFS=document.getElementById('readerFS');
+  const rfsRef  =document.getElementById('rfsRef');
+  const rfsInner=document.getElementById('rfsInner');
+  const rfsBody =readerFS?readerFS.querySelector('.rfs-body'):null;
+
+  function inNativeFS(){ return !!(document.fullscreenElement||document.webkitFullscreenElement); }
+  function requestNative(){ const r=readerFS.requestFullscreen||readerFS.webkitRequestFullscreen; if(r) r.call(readerFS).catch(()=>{}); }
+  function exitNative(){ const x=document.exitFullscreen||document.webkitExitFullscreen; if(x&&inNativeFS()) x.call(document).catch(()=>{}); }
+
+  function openFullscreen(i, targetPi){
+    const m=MSGS[i]; if(!m||!readerFS) return;
+    rfsRef.textContent=m.title+' · '+m.code;
+    let html='<div class="bible-ref">'+esc(m.title)+'</div>';
+    m.paras.forEach((p,pi)=>{
+      const act=pi===targetPi?' fs-active':'';
+      html+='<div class="rfs-para'+act+'" data-pi="'+pi+'">';
+      p.blocks.forEach((b,bi)=>{
+        if(bi===0) html+='<p class="verse"><span class="vn">'+p.num+'</span>'+esc(b)+'</p>';
+        else       html+='<p class="verse rfs-subv">'+esc(b)+'</p>';
+      });
+      html+='</div>';
+    });
+    rfsInner.innerHTML=html;
+    readerFS.classList.add('open'); readerFS.classList.remove('minimized');
+    document.body.style.overflow='hidden'; rfsBody.scrollTop=0;
+    if(targetPi!=null){
+      const t=rfsInner.querySelector('[data-pi="'+targetPi+'"]');
+      if(t) setTimeout(()=>t.scrollIntoView({behavior:'smooth',block:'center'}),80);
+    }
+    requestNative();
+  }
+  function minimize(){ readerFS.classList.add('minimized'); exitNative(); }
+  function expand(){ readerFS.classList.remove('minimized'); requestNative(); }
+  function closeFullscreen(){ readerFS.classList.remove('open','minimized'); document.body.style.overflow=''; exitNative(); }
+
+  if(readerFS){
+    readerEl.addEventListener('click',e=>{
+      const para=e.target.closest('.msg-para'); if(!para||current<0) return;
+      openFullscreen(current, +para.dataset.pi);
+    });
+    document.getElementById('rfsClose').addEventListener('click', closeFullscreen);
+    document.getElementById('rfsExpand').addEventListener('click', expand);
+    readerFS.addEventListener('click',e=>{ if(readerFS.classList.contains('minimized')&&e.target===readerFS) closeFullscreen(); });
+    ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{
+      if(!inNativeFS()&&readerFS.classList.contains('open')) readerFS.classList.add('minimized');
+    }));
+    document.addEventListener('keydown',e=>{
+      if(e.key!=='Escape'||!readerFS.classList.contains('open')) return;
+      if(inNativeFS()) return;
+      if(readerFS.classList.contains('minimized')) closeFullscreen(); else minimize();
+    });
+  }
+
+  // Carga diferida
+  const obs=new IntersectionObserver(es=>{ es.forEach(e=>{ if(e.isIntersecting){ load(); obs.disconnect(); } }); },{rootMargin:'250px'});
   obs.observe(section);
 })();
 
